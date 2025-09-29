@@ -1,39 +1,86 @@
 import pandas as pd
-import numpy as np
-from si.data.dataset import Dataset  
 
-def read_csv(filename: str, sep: str, features: bool, label: bool) -> Dataset:
+from si.data.dataset import Dataset
 
-    dataframe = pd.read_csv(filename, sep=sep)
+
+def read_csv(filename: str,
+             sep: str = ',',
+             features: bool = False,
+             label: bool = False) -> Dataset:
+    """
+    Reads a csv file (data file) into a Dataset object
+
+    Parameters
+    ----------
+    filename : str
+        Path to the file
+    sep : str, optional
+        The separator used in the file, by default ','
+    features : bool, optional
+        Whether the file has a header, by default False
+    label : bool, optional
+        Whether the file has a label, by default False
+
+    Returns
+    -------
+    Dataset
+        The dataset object
+    """
+    data = pd.read_csv(filename, sep=sep)
 
     if features and label:
-        X = dataframe.iloc[:, :-1].to_numpy()
-        y = dataframe.iloc[:, -1].to_numpy()
-        feature_names = dataframe.columns[:-1]
-        label_name = dataframe.columns[-1]
-        return Dataset(X=X, y=y, features=feature_names, label=label_name)
-    elif features: 
-        X = dataframe.to_numpy()
-        feature_names = dataframe.columns
-        return Dataset(X=X, features=feature_names)
-    elif label:
-        X= np.array()
-        y = dataframe.iloc[:, -1].to_numpy()
-        label_name = dataframe.columns[-1]
-        return Dataset(X=X, y=y, label=label_name)
+        features = data.columns[:-1]
+        label = data.columns[-1]
+        X = data.iloc[:, :-1].to_numpy()
+        y = data.iloc[:, -1].to_numpy()
+
+    elif features and not label:
+        features = data.columns
+        X = data.to_numpy()
+        y = None
+
+    elif not features and label:
+        X = data.iloc[:, :-1].to_numpy()
+        y = data.iloc[:, -1].to_numpy()
+        features = None
+        label = data.columns[-1]
+
     else:
-        return None 
-    
-def write_csv(filename: str, dataset: Dataset, sep: str = ",", features: bool = True, label: bool = True) -> None:
-    df= pd.DataFrame(dataset.X)
-    if features: 
-        df.columns = dataset.features
+        X = data.to_numpy()
+        y = None
+        features = None
+        label = None
+
+    return Dataset(X=X, y=y, features=features, label=label)
+
+
+def write_csv(filename: str,
+              dataset: Dataset,
+              sep: str = ',',
+              features: bool = False,
+              label: bool = False) -> None:
+    """
+    Writes a Dataset object to a csv file
+
+    Parameters
+    ----------
+    filename : str
+        Path to the file
+    dataset : Dataset
+        The dataset object
+    sep : str, optional
+        The separator used in the file, by default ','
+    features : bool, optional
+        Whether the file has a header, by default False
+    label : bool, optional
+        Whether the file has a label, by default False
+    """
+    data = pd.DataFrame(dataset.X)
+
+    if features:
+        data.columns = dataset.features
+
     if label:
-        y= dataset.y
-        label_name= dataset.label 
-        df[label_name]= y
-    else:
-        y= None
-        label_name= None
-    
-    df.to_csv(filename, sep=sep, index=False)
+        data[dataset.label] = dataset.y
+
+    data.to_csv(filename, sep=sep, index=False)
