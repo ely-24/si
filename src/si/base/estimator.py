@@ -33,7 +33,7 @@ class Estimator(metaclass=ABCMeta):
         self._is_fitted = True
         return self
 
-    @abstractmethod
+    @abstractmethod #obriga as classes filhas a implementarem este metodo
     def _fit(self, dataset: Dataset) -> 'Estimator':
         """
         Fit the estimator to the data.
