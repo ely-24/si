@@ -198,7 +198,109 @@ class Dataset:
         y = np.random.randint(0, n_classes, n_samples)
         return cls(X, y, features=features, label=label)
 
+    
+    def dropna(self) -> 'Dataset':
+        """
+        Removes all samples (rows) that contain at least one NaN.
+        Returns
+        ------- 
+        Dataset with incomplete rows removed.
+        """
+        valid_rows = ~np.isnan(self.X).any(axis=1) 
+        self.X = self.X[valid_rows]
+        if self.y is not None:
+            self.y = self.y[valid_rows] #only if y exists (avoids errors when the dataset has no label). 
+        return self
+    
+    
+    def fillna(self, value: Union[float, int, str]) -> 'Dataset':
+        """
+        Replace missing values (NaNs) in the dataset using either:
+        - a numeric constant,
+        - the column-wise mean,
+        - or the column-wise median.
 
+        Parameters
+        ----------
+        value : float, int, or str
+            Strategy for filling NaNs.
+
+        Returns
+        -------
+        Dataset with NaNs replaced.
+        """
+
+        #Case 1: numeric value (quick path)
+        if isinstance(value, (float, int)):
+            # Replace all NaNs directly
+            mask_nan = np.isnan(self.X)
+            self.X[mask_nan] = value
+            return self
+
+        #Case 2: must be a string strategy
+        if not isinstance(value, str):
+            raise TypeError("value must be a number or one of {'mean', 'median'}")
+
+        strategy = value.lower()
+
+        if strategy not in ("mean", "median"):
+            raise ValueError("Invalid fillna strategy. Use a number, 'mean' or 'median'.")
+
+        #Compute the column statistic only once
+        if strategy == "mean":
+            stats = np.nanmean(self.X, axis=0)
+        else:  # median
+            stats = np.nanmedian(self.X, axis=0)
+
+        #Find NaN positions
+        nan_positions = np.isnan(self.X)
+
+        #fill each NaN using its column statistic
+        for col_idx in range(self.X.shape[1]):
+            self.X[nan_positions[:, col_idx], col_idx] = stats[col_idx]
+
+        return self
+
+    
+    def remove_by_index(self, index: int) -> 'Dataset':
+        """
+        Remove a single sample (row) at the specified index.
+        Supports negative indices following Python conventions.
+
+        Parameters
+        ----------
+        index : int
+            Position of the row to remove.
+
+        Returns
+        -------
+        Dataset
+            The dataset with the given row removed.
+        """
+
+        n_rows = self.X.shape[0]
+
+        # Convert negative index to positive equivalent
+        if index < 0:
+            index = n_rows + index
+
+        # Validate the final index
+        if index < 0 or index >= n_rows:
+            raise IndexError("Index out of bounds for dataset removal.")
+
+        # Build a boolean mask that excludes the selected row
+        keep = np.ones(n_rows, dtype=bool)
+        keep[index] = False
+
+        # Apply mask to X
+        self.X = self.X[keep]
+
+        # Apply mask to y if labels exist
+        if self.y is not None:
+            self.y = self.y[keep]
+
+        return self
+    
 if __name__ == '__main__':
     X = np.array([[1, 2, 3], [4, 5, 6]])
     y = np.array([1, 2])
@@ -214,3 +316,8 @@ if __name__ == '__main__':
     print(dataset.get_min())
     print(dataset.get_max())
     print(dataset.summary())
+    ds = Dataset(np.array([[1, np.nan, 3],[4, 5, np.nan]]), y=np.array([0,1]), features=['a','b','c'], label='y')
+    print("Before:\n", ds.X)
+    ds.fillna("mean")
+    print("After fillna(mean):\n", ds.X)
+
