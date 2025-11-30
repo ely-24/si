@@ -110,7 +110,7 @@ class Model(Estimator, ABC):
         if self.is_fitted():
 
             predictions = self.predict(dataset=dataset)
-            return float(self._score(dataset, predictions))
+            return float(self._score(dataset, predictions=predictions))
         
         else:
             raise ValueError("Your model is not fitted, please call method.fit")
