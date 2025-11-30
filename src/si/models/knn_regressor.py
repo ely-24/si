@@ -55,9 +55,7 @@ class KNNRegressor(Model):
         """
         return np.apply_along_axis(self._get_average_value, 1, dataset.X)
 
-    def _score(self, dataset: Dataset) -> float:
-        """
-        Returns RMSE between predictions and true values.
-        """
-        preds = self.predict(dataset)
-        return rmse(dataset.y, preds)
+def _score(self, dataset: Dataset, predictions=None) -> float:
+    if predictions is None:
+        predictions = self.predict(dataset)
+    return rmse(dataset.y, predictions)
