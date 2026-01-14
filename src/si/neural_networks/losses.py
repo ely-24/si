@@ -131,3 +131,24 @@ class BinaryCrossEntropy(LossFunction):
         # Avoid division by zero
         p = np.clip(y_pred, 1e-15, 1 - 1e-15)
         return - (y_true / p) + (1 - y_true) / (1 - p)
+
+class CategoricalCrossEntropy(LossFunction):
+    """
+    Categorical Cross-Entropy loss function.
+
+    Used for multi-class classification problems with one-hot encoded labels.
+    """
+
+    def loss(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+        """
+        Compute Categorical Cross-Entropy loss.
+        """
+        y_pred = np.clip(y_pred, 1e-15, 1 - 1e-15)
+        return -np.mean(np.sum(y_true * np.log(y_pred), axis=1))
+
+    def derivative(self, y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
+        """
+        Compute the derivative of Categorical Cross-Entropy loss.
+        """
+        y_pred = np.clip(y_pred, 1e-15, 1 - 1e-15)
+        return -y_true / y_pred

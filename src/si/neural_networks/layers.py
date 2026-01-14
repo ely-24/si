@@ -141,3 +141,50 @@ class DenseLayer(Layer):
             The shape of the output of the layer.
         """
         return (self.n_units,) 
+    
+class Dropout(Layer):
+    """
+    Dropout layer used for regularization in neural networks.
+    Randomly disables a fraction of neurons during training.
+    """
+
+    def __init__(self, probability: float):
+        if not 0 < probability < 1:
+            raise ValueError("probability must be between 0 and 1")
+
+        self.probability = probability
+        self.mask = None
+        self._input = None
+
+    def forward_propagation(self, input: np.ndarray, training: bool = False) -> np.ndarray:
+        """
+        Forward pass of the Dropout layer.
+        """
+        self._input = input
+
+        if training:
+            keep_prob = 1 - self.probability
+            self.mask = np.random.binomial(1, keep_prob, size=input.shape)
+            return input * self.mask / keep_prob
+
+        # inference mode → no dropout
+        self.mask = np.ones_like(input)
+        return input
+
+    def backward_propagation(self, output_error: np.ndarray) -> np.ndarray:
+        """
+        Backward pass applies the dropout mask to the gradient.
+        """
+        return output_error * self.mask
+
+    def output_shape(self) -> tuple:
+        """
+        Dropout does not change the shape of the data.
+        """
+        return self._input.shape
+
+    def parameters(self) -> int:
+        """
+        Dropout has no trainable parameters.
+        """
+        return 0

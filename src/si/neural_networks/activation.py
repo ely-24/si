@@ -177,3 +177,99 @@ class ReLUActivation(ActivationLayer):
             The derivative of the activation function.
         """
         return np.where(input >= 0, 1, 0)
+
+
+class TanhActivation(ActivationLayer):
+    """
+    Hyperbolic Tangent (tanh) activation function.
+
+    The tanh function maps input values to the range (-1, 1),
+    and is commonly used in hidden layers of neural networks.
+    """
+
+    def activation_function(self, input: np.ndarray) -> np.ndarray:
+        """
+        Apply the hyperbolic tangent activation function.
+
+        Parameters
+        ----------
+        input : np.ndarray
+            Input array to which the tanh function is applied.
+
+        Returns
+        -------
+        np.ndarray
+            Output array after applying tanh element-wise.
+        """
+        return np.tanh(input)
+
+    def derivative(self, input: np.ndarray) -> np.ndarray:
+        """
+        Compute the derivative of the tanh activation function.
+
+        The derivative of tanh(x) is:
+            1 - tanh(x)^2
+
+        Parameters
+        ----------
+        input : np.ndarray
+            Input array used to compute the derivative.
+
+        Returns
+        -------
+        np.ndarray
+            Derivative of the tanh function applied element-wise.
+        """
+        tanh_output = self.activation_function(input)
+        return 1 - tanh_output ** 2
+
+
+class SoftmaxActivation(ActivationLayer):
+    """
+    Softmax activation function.
+
+    The softmax function converts raw scores (logits) into
+    probabilities that sum to 1, making it suitable for
+    multi-class classification problems.
+    """
+
+    def activation_function(self, input: np.ndarray) -> np.ndarray:
+        """
+        Apply the softmax activation function.
+
+        A numerically stable version is used by subtracting
+        the maximum value from each input vector.
+
+        Parameters
+        ----------
+        input : np.ndarray
+            Input array where each row represents a sample.
+
+        Returns
+        -------
+        np.ndarray
+            Output array containing class probabilities for each sample.
+        """
+        exp_values = np.exp(input - np.max(input, axis=1, keepdims=True))
+        return exp_values / np.sum(exp_values, axis=1, keepdims=True)
+
+    def derivative(self, input: np.ndarray) -> np.ndarray:
+        """
+        Compute the derivative of the softmax activation function.
+
+        Note:
+        This is a simplified element-wise derivative, commonly used
+        when softmax is combined with cross-entropy loss.
+
+        Parameters
+        ----------
+        input : np.ndarray
+            Input array used to compute the derivative.
+
+        Returns
+        -------
+        np.ndarray
+            Element-wise derivative of the softmax output.
+        """
+        softmax_output = self.activation_function(input)
+        return softmax_output * (1 - softmax_output)
