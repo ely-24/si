@@ -78,7 +78,7 @@ class RandomForestClassifier(Model):
                 max_depth=self.max_depth,
                 mode=self.mode
             )
-            tree.fit(Dataset(X_bootstrap, y_bootstrap))
+            tree.fit(Dataset(X_bootstrap, y_bootstrap)) #boo
 
             # Store features + tree
             self.trees.append((feature_indices, tree))

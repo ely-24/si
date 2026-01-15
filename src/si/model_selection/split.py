@@ -80,7 +80,7 @@ def stratified_train_test_split(dataset: Dataset, test_size: float = 0.2, random
 
     # Stratified sampling
     for label, count in zip(unique_labels, counts):
-        label_indices = np.where(y == label)[0]
+        label_indices = np.where(y == label)[0] # importante 
         np.random.shuffle(label_indices)
 
         n_test = round(count * test_size)  # keeps distribution accurate

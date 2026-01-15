@@ -206,7 +206,7 @@ class Dataset:
         ------- 
         Dataset with incomplete rows removed.
         """
-        valid_rows = ~np.isnan(self.X).any(axis=1) 
+        valid_rows = ~np.isnan(self.X).any(axis=1) # o ~seleciona os falsos 
         self.X = self.X[valid_rows]
         if self.y is not None:
             self.y = self.y[valid_rows] #only if y exists (avoids errors when the dataset has no label). 

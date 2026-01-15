@@ -23,7 +23,7 @@ def tanimoto_similarity(x: np.ndarray, y: np.ndarray) -> np.ndarray:
         raise ValueError("x and y must have the same number of features.")
 
     # Dot products and squared norms
-    dot_xy = np.dot(y, x)       # overlap with each sample
+    dot_xy = np.dot(y, x)       # overlap with each sample nº de colunas diferente de linhas
     x2 = np.dot(x, x)           # |x|²
     y2 = np.sum(y * y, axis=1)  # |y|² for each row
 

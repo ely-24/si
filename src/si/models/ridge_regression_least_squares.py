@@ -60,7 +60,7 @@ class RidgeRegressionLeastSquares(Model):
         reg[0, 0] = 0                               # do not penalize intercept
 
         # 4 ─ Solve closed-form ridge solution
-        A = X_aug.T @ X_aug + reg
+        A = X_aug.T @ X_aug + reg #mais eficiente que usar o np.dot
         B = X_aug.T @ y
         coefs = np.linalg.inv(A) @ B
 
